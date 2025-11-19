@@ -24,7 +24,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-应用启动后，访问 http://localhost:5000
+应用启动后，访问 http://localhost:8080
 
 ### 2. 填写参数
 
