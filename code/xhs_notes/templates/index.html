@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书笔记数据导出工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* 流动几何装饰 */
+        .geometric-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .shape3 {
+            width: 150px;
+            height: 150px;
+            bottom: 10%;
+            left: 30%;
+            animation-delay: 10s;
+        }
+
+        .shape4 {
+            width: 250px;
+            height: 250px;
+            top: 20%;
+            right: 30%;
+            animation-delay: 15s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* 玻璃态卡片 */
+        .container {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 60px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        /* 信息提示图标 */
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 8px;
+            cursor: help;
+            position: relative;
+        }
+
+        .info-tooltip {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: normal;
+            max-width: 350px;
+            width: max-content;
+            line-height: 1.5;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .info-tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1a1a2e;
+        }
+
+        .info-icon:hover .info-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 脚注样式 */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .developer-name {
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 18px 22px;
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .required {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(26, 26, 46, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            color: #667eea;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .result.success {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #0a5f3e;
+            border: 1px solid rgba(132, 250, 176, 0.3);
+        }
+
+        .result.error {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #721c24;
+            border: 1px solid rgba(255, 154, 158, 0.3);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 18px 40px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            body {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 流动几何装饰 -->
+    <div class="geometric-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+        <div class="shape shape4"></div>
+    </div>
+
+    <div class="container">
+        <h1>小红书笔记数据导出工具</h1>
+        <p class="subtitle">
+            输入参数，一键导出用户笔记数据到Excel
+        </p>
+
+        <form id="exportForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="userName">用户名 <span class="required">*</span>
+                        <span class="info-icon">i
+                            <span class="info-tooltip">小红书用户名</span>
+                        </span>
+                    </label>
+                    <input type="text" id="userName" name="userName" required
+                           placeholder="请输入用户名">
+                </div>
+
+                <div class="form-group">
+                    <label for="noteCount">笔记数量 <span class="required">*</span>
+                        <span class="info-icon">i
+                            <span class="info-tooltip">您需要导出的笔记数量（按发布时间倒序计数），请限制在1000以内，避免请求过大</span>
+                        </span>
+                    </label>
+                    <input type="number" id="noteCount" name="noteCount" required
+                           min="1" max="1000" placeholder="如: 100">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="userUrl">用户主页URL <span class="required">*</span>
+                    <span class="info-icon">i
+                        <span class="info-tooltip">打开小红书网页版，登录您个人账号以获取URL</span>
+                    </span>
+                </label>
+                <input type="text" id="userUrl" name="userUrl" required
+                       placeholder="https://www.xiaohongshu.com/user/profile/...">
+                <div class="help-text">示例: https://www.xiaohongshu.com/user/profile/565a5df882718c306ecad934</div>
+            </div>
+
+            <div class="form-group">
+                <label for="userCookie">用户Cookie <span class="required">*</span>
+                    <span class="info-icon">i
+                        <span class="info-tooltip">登录小红书网页版，从浏览器开发者工具中获取完整的Cookie字符串</span>
+                    </span>
+                </label>
+                <textarea id="userCookie" name="userCookie" required
+                          placeholder="请粘贴完整的Cookie字符串..."></textarea>
+                <div class="help-text">请确保Cookie的有效性，过期Cookie会导致数据获取失败</div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn" id="submitBtn">
+                    开始导出
+                </button>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            正在执行工作流，请稍候...
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <!-- 页面脚注 -->
+    <div class="footer">
+        本工具由<span class="developer-name">Jing（泽雉）</span>开发，特别鸣谢coze、Claude Code、GLM-4.6的帮助
+    </div>
+
+    <script>
+        document.getElementById('exportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+
+            // 获取表单数据
+            const formData = new FormData(this);
+            const data = {
+                note_count: parseInt(formData.get('noteCount')),
+                user_URL: formData.get('userUrl'),
+                user_name: formData.get('userName'),
+                user_cookie: formData.get('userCookie')
+            };
+
+            // 显示加载状态
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+            result.classList.remove('success', 'error');
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok && responseData.success) {
+                    // 显示成功结果
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <h3>✅ 导出成功！</h3>
+                        <p>成功导出 ${responseData.record_count} 条笔记记录</p>
+                        <a href="${responseData.download_url}" class="download-btn" download>
+                            📥 下载Excel文件
+                        </a>
+                    `;
+                } else {
+                    // 显示错误结果
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <h3>❌ 导出失败</h3>
+                        <p>${responseData.error || '未知错误'}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('请求错误:', error);
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ 网络错误</h3>
+                    <p>请检查网络连接或稍后重试</p>
+                `;
+            } finally {
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+                result.style.display = 'block';
+            }
+        });
+
+        // 表单验证
+        document.getElementById('userUrl').addEventListener('blur', function() {
+            const url = this.value.trim();
+            if (url && !url.includes('xiaohongshu.com/user/profile/')) {
+                this.setCustomValidity('请输入正确的小红书用户主页URL');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // 限制笔记数量范围
+        document.getElementById('noteCount').addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value < 1) this.value = 1;
+            if (value > 1000) this.value = 1000;
+        });
+
+        // 添加输入时的交互效果
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.01)';
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
