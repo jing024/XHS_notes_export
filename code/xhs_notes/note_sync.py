@@ -22,7 +22,7 @@ def run_workflow(workflow_id, parameters=None, is_async=False, bot_id=None):
     
     # 请求头 - 请替换为你的实际 token
     headers = {
-        "Authorization": "Bearer pat_NevCqPkDxQtBhYLLarQKEf1aITp3gZsWHDQ9Yiuz5nyZBFCK7zcqmm3R9o9yz8jr",  # 替换为你的实际 token
+        "Authorization": "Bearer pat_KODqxJGyoRhLT5H1hyf7dsvJOYjqkg8xn9q5njYJco5f6G6pcKmlS0p4l6vkFQup",  # 替换为你的实际 token
         "Content-Type": "application/json"
     }
     
