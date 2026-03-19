@@ -1,7 +1,19 @@
 import requests
 import json
 import pandas as pd
+import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
+
+# 从环境变量获取配置
+COZE_API_TOKEN = os.getenv('COZE_API_TOKEN')
+COZE_API_URL = os.getenv('COZE_API_URL', 'https://api.coze.cn/v1/workflow/run')
+
+if not COZE_API_TOKEN:
+    raise ValueError("错误：未设置 COZE_API_TOKEN 环境变量。请在 .env 文件中配置或设置环境变量。")
 
 def run_workflow(workflow_id, parameters=None, is_async=False, bot_id=None):
     """
@@ -18,11 +30,11 @@ def run_workflow(workflow_id, parameters=None, is_async=False, bot_id=None):
     """
     
     # API 端点
-    url = "https://api.coze.cn/v1/workflow/run"
+    url = COZE_API_URL
     
-    # 请求头 - 请替换为你的实际 token
+    # 请求头
     headers = {
-        "Authorization": "Bearer pat_KODqxJGyoRhLT5H1hyf7dsvJOYjqkg8xn9q5njYJco5f6G6pcKmlS0p4l6vkFQup",  # 替换为你的实际 token
+        "Authorization": f"Bearer {COZE_API_TOKEN}",
         "Content-Type": "application/json"
     }
     

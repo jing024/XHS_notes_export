@@ -16,9 +16,29 @@
 pip install -r requirements.txt
 ```
 
-## 使用方法
+## 配置环境变量
 
-### 1. 启动应用
+### 1. 复制环境变量模板
+
+```bash
+cp .env.example .env
+```
+
+### 2. 编辑 .env 文件
+
+打开 `.env` 文件，填写你的 Coze API Token：
+
+```env
+COZE_API_TOKEN=your_coze_api_token_here
+```
+
+**⚠️ 重要提示：Coze API Token 有效期只有一个月！**
+
+- Token 过期后需要重新到 Coze 平台生成
+- 生成路径：登录 Coze 平台 → 个人设置 → API Token
+- 建议设置日历提醒，在到期前更新 Token
+
+### 3. 启动应用
 
 ```bash
 python app.py
@@ -111,11 +131,13 @@ xhs_notes/
 
 ## 注意事项
 
-1. 请确保Cookie的有效性，过期Cookie会导致数据获取失败
-2. 笔记数量限制在1-1000之间，避免请求过大
-3. 生成的Excel文件会保存在downloads目录中
-4. 建议定期清理downloads目录中的旧文件
-5. 请遵守小红书的使用条款和相关法律法规
+1. **⚠️ API Token 有效期**：Coze API Token 只有一个月有效期，过期后需要重新生成并更新 `.env` 文件
+2. 请确保Cookie的有效性，过期Cookie会导致数据获取失败
+3. 笔记数量限制在1-1000之间，避免请求过大
+4. 生成的Excel文件会保存在downloads目录中
+5. 建议定期清理downloads目录中的旧文件
+6. 请遵守小红书的使用条款和相关法律法规
+7. **安全提醒**：`.env` 文件包含敏感信息，请勿提交到 Git 仓库（已添加到 .gitignore）
 
 ## 故障排除
 
